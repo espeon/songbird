@@ -20,7 +20,7 @@ impl ConnectionProgress {
     pub(crate) fn get_connection_info(&self) -> Option<&ConnectionInfo> {
         use ConnectionProgress::*;
         match self {
-            Complete(c) => Some(&c),
+            Complete(c) => Some(c),
             _ => None,
         }
     }
@@ -104,7 +104,7 @@ impl ConnectionProgress {
 
 /// Parameters and information needed to start communicating with Discord's voice servers, either
 /// with the Songbird driver, lavalink, or other system.
-#[derive(Clone)]
+#[derive(Clone, Eq, Hash, PartialEq)]
 pub struct ConnectionInfo {
     /// ID of the voice channel being joined, if it is known.
     ///

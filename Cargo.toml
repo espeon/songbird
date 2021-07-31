@@ -10,7 +10,7 @@ license = "ISC"
 name = "songbird"
 readme = "README.md"
 repository = "https://github.com/serenity-rs/songbird.git"
-version = "0.1.5"
+version = "0.2.0-beta.4"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
@@ -51,7 +51,7 @@ version = "4"
 [dependencies.discortp]
 features = ["discord-full"]
 optional = true
-version = "0.3"
+version = "0.4"
 
 [dependencies.flume]
 optional = true
@@ -105,12 +105,12 @@ default-features = false
 
 [dependencies.twilight-gateway]
 optional = true
-version = "0.3"
+version = "0.5"
 default-features = false
 
 [dependencies.twilight-model]
 optional = true
-version = "0.3"
+version = "0.5"
 default-features = false
 
 [dependencies.typemap_rev]
@@ -128,7 +128,8 @@ features = ["v4"]
 
 [dependencies.xsalsa20poly1305]
 optional = true
-version = "0.6"
+version = "0.7"
+features = ["std"]
 
 [dev-dependencies]
 criterion = "0.3"
@@ -187,8 +188,8 @@ serenity-native = ["serenity/native_tls_backend", "native", "gateway", "serenity
 twilight-rustls = ["twilight", "twilight-gateway/rustls", "rustls", "gateway"]
 twilight-native = ["twilight", "twilight-gateway/native", "native", "gateway"]
 twilight = ["twilight-model"]
-simd-zlib = ["twilight-gateway/simd-zlib"]
-stock-zlib = ["twilight-gateway/stock-zlib"]
+zlib-simd = ["twilight-gateway/zlib-simd"]
+zlib-stock = ["twilight-gateway/zlib-stock"]
 serenity-deps = ["async-trait"]
 
 rustls-marker = []
@@ -225,7 +226,7 @@ youtube-dlc = []
 builtin-queue = []
 
 # Used for docgen/testing/benchmarking.
-full-doc = ["default", "twilight-rustls", "builtin-queue", "stock-zlib"]
+full-doc = ["default", "twilight-rustls", "builtin-queue", "zlib-stock"]
 internals = []
 
 [[bench]]

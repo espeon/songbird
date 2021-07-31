@@ -26,6 +26,7 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 #[cfg(feature = "tokio-02-marker")]
 use tokio_compat::sync::Mutex;
+use tracing::debug;
 #[cfg(feature = "twilight")]
 use twilight_gateway::Cluster;
 #[cfg(feature = "twilight")]
@@ -378,10 +379,7 @@ impl Songbird {
 
                 if let Some(call) = call {
                     let mut handler = call.lock().await;
-                    handler.update_state(
-                        v.0.session_id.clone(),
-                        v.0.channel_id.clone().map(Into::into),
-                    );
+                    handler.update_state(v.0.session_id.clone(), v.0.channel_id.map(Into::into));
                 }
             },
             _ => {},
@@ -393,15 +391,30 @@ impl Songbird {
 #[async_trait]
 impl VoiceGatewayManager for Songbird {
     async fn initialise(&self, shard_count: u64, user_id: SerenityUser) {
+        debug!(
+            "Initialising Songbird for Serenity: ID {:?}, {} Shards",
+            user_id, shard_count
+        );
         self.initialise_client_data(shard_count, user_id);
+        debug!("Songbird ({:?}) Initialised!", user_id);
     }
 
     async fn register_shard(&self, shard_id: u64, sender: Sender<InterMessage>) {
+        debug!(
+            "Registering Serenity shard handle {} with Songbird",
+            shard_id
+        );
         self.sharder.register_shard_handle(shard_id, sender);
+        debug!("Registered shard handle {}.", shard_id);
     }
 
     async fn deregister_shard(&self, shard_id: u64) {
+        debug!(
+            "Deregistering Serenity shard handle {} with Songbird",
+            shard_id
+        );
         self.sharder.deregister_shard_handle(shard_id);
+        debug!("Deregistered shard handle {}.", shard_id);
     }
 
     async fn server_update(&self, guild_id: SerenityGuild, endpoint: &Option<String>, token: &str) {
@@ -422,7 +435,7 @@ impl VoiceGatewayManager for Songbird {
             let mut handler = call.lock().await;
             handler.update_state(
                 voice_state.session_id.clone(),
-                voice_state.channel_id.clone().map(Into::into),
+                voice_state.channel_id.map(Into::into),
             );
         }
     }
