@@ -63,13 +63,18 @@ async fn main() {
         .await
         .expect("Err creating client");
 
-    let _ = client.start().await.map_err(|why| println!("Client ended: {:?}", why));
+    tokio::spawn(async move {
+        let _ = client.start().await.map_err(|why| println!("Client ended: {:?}", why));
+    });
+    
+    tokio::signal::ctrl_c().await;
+    println!("Received Ctrl-C, shutting down.");
 }
 
 #[command]
 #[only_in(guilds)]
 async fn deafen(ctx: &Context, msg: &Message) -> CommandResult {
-    let guild = msg.guild(&ctx.cache).await.unwrap();
+    let guild = msg.guild(&ctx.cache).unwrap();
     let guild_id = guild.id;
 
     let manager = songbird::get(ctx).await
@@ -102,7 +107,7 @@ async fn deafen(ctx: &Context, msg: &Message) -> CommandResult {
 #[command]
 #[only_in(guilds)]
 async fn join(ctx: &Context, msg: &Message) -> CommandResult {
-    let guild = msg.guild(&ctx.cache).await.unwrap();
+    let guild = msg.guild(&ctx.cache).unwrap();
     let guild_id = guild.id;
 
     let channel_id = guild
@@ -129,7 +134,7 @@ async fn join(ctx: &Context, msg: &Message) -> CommandResult {
 #[command]
 #[only_in(guilds)]
 async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
-    let guild = msg.guild(&ctx.cache).await.unwrap();
+    let guild = msg.guild(&ctx.cache).unwrap();
     let guild_id = guild.id;
 
     let manager = songbird::get(ctx).await
@@ -152,7 +157,7 @@ async fn leave(ctx: &Context, msg: &Message) -> CommandResult {
 #[command]
 #[only_in(guilds)]
 async fn mute(ctx: &Context, msg: &Message) -> CommandResult {
-    let guild = msg.guild(&ctx.cache).await.unwrap();
+    let guild = msg.guild(&ctx.cache).unwrap();
     let guild_id = guild.id;
 
     let manager = songbird::get(ctx).await
@@ -207,7 +212,7 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         return Ok(());
     }
 
-    let guild = msg.guild(&ctx.cache).await.unwrap();
+    let guild = msg.guild(&ctx.cache).unwrap();
     let guild_id = guild.id;
 
     let manager = songbird::get(ctx).await
@@ -240,7 +245,7 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 #[command]
 #[only_in(guilds)]
 async fn undeafen(ctx: &Context, msg: &Message) -> CommandResult {
-    let guild = msg.guild(&ctx.cache).await.unwrap();
+    let guild = msg.guild(&ctx.cache).unwrap();
     let guild_id = guild.id;
 
     let manager = songbird::get(ctx).await
@@ -263,7 +268,7 @@ async fn undeafen(ctx: &Context, msg: &Message) -> CommandResult {
 #[command]
 #[only_in(guilds)]
 async fn unmute(ctx: &Context, msg: &Message) -> CommandResult {
-    let guild = msg.guild(&ctx.cache).await.unwrap();
+    let guild = msg.guild(&ctx.cache).unwrap();
     let guild_id = guild.id;
     
     let manager = songbird::get(ctx).await

@@ -87,11 +87,11 @@ impl Songbird {
     /// [`process`].
     ///
     /// [`process`]: Songbird::process
-    pub fn twilight<U>(cluster: Cluster, shard_count: u64, user_id: U) -> Arc<Self>
+    pub fn twilight<U>(cluster: Cluster, user_id: U) -> Self
     where
         U: Into<UserId>,
     {
-        Self::twilight_from_config(cluster, shard_count, user_id, Default::default())
+        Self::twilight_from_config(cluster, user_id, Default::default())
     }
 
     #[cfg(feature = "twilight")]
@@ -102,25 +102,24 @@ impl Songbird {
     /// [`process`].
     ///
     /// [`process`]: Songbird::process
-    pub fn twilight_from_config<U>(
-        cluster: Cluster,
-        shard_count: u64,
-        user_id: U,
-        config: Config,
-    ) -> Arc<Self>
+    pub fn twilight_from_config<U>(cluster: Cluster, user_id: U, config: Config) -> Self
     where
         U: Into<UserId>,
     {
-        Arc::new(Self {
+        Self {
             client_data: PRwLock::new(ClientData {
-                shard_count,
+                shard_count: cluster
+                    .config()
+                    .shard_scheme()
+                    .total()
+                    .unwrap_or_else(|| cluster.shards().len() as u64),
                 initialised: true,
                 user_id: user_id.into(),
             }),
             calls: Default::default(),
             sharder: Sharder::Twilight(cluster),
             config: Some(config).into(),
-        })
+        }
     }
 
     /// Set the bot's user, and the number of shards in use.
@@ -156,7 +155,15 @@ impl Songbird {
     /// This will not join any calls, or cause connection state to change.
     ///
     /// [`Call`]: Call
-    pub fn get_or_insert(&self, guild_id: GuildId) -> Arc<Mutex<Call>> {
+    #[inline]
+    pub fn get_or_insert<G>(&self, guild_id: G) -> Arc<Mutex<Call>>
+    where
+        G: Into<GuildId>,
+    {
+        self._get_or_insert(guild_id.into())
+    }
+
+    fn _get_or_insert(&self, guild_id: GuildId) -> Arc<Mutex<Call>> {
         self.get(guild_id).unwrap_or_else(|| {
             self.calls
                 .entry(guild_id)
@@ -379,7 +386,7 @@ impl Songbird {
 
                 if let Some(call) = call {
                     let mut handler = call.lock().await;
-                    handler.update_state(v.0.session_id.clone(), v.0.channel_id.map(Into::into));
+                    handler.update_state(v.0.session_id.clone(), v.0.channel_id);
                 }
             },
             _ => {},
@@ -433,10 +440,7 @@ impl VoiceGatewayManager for Songbird {
 
         if let Some(call) = self.get(guild_id) {
             let mut handler = call.lock().await;
-            handler.update_state(
-                voice_state.session_id.clone(),
-                voice_state.channel_id.map(Into::into),
-            );
+            handler.update_state(voice_state.session_id.clone(), voice_state.channel_id);
         }
     }
 }

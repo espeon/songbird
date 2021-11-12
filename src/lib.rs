@@ -35,7 +35,10 @@
 //! [this crate's examples directory]: https://github.com/serenity-rs/songbird/tree/current/examples
 //! ["Black-Capped Chickadee"]: https://www.oldbookillustrations.com/illustrations/black-capped-chickadee/
 //! [`ConnectionInfo`]: struct@ConnectionInfo
-//! [lavalink]: https://github.com/Frederikam/Lavalink
+//! [lavalink]: https://github.com/freyacodes/Lavalink
+
+#[cfg(all(feature = "youtube-dlc", feature = "yt-dlp"))]
+compile_error!("feature \"youtube-dlc\" and feature \"yt-dlp\" cannot be enabled at the same time");
 
 mod config;
 pub mod constants;
